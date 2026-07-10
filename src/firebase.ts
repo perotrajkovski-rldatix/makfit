@@ -1,0 +1,84 @@
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { initializeFirestore, persistentLocalCache, persistentSingleTabManager } from 'firebase/firestore';
+import firebaseConfig from '../firebase-applet-config.json';
+
+const envFirebaseApiKey = (import.meta.env.VITE_FIREBASE_API_KEY as string | undefined)?.trim();
+const configFirebaseApiKey = (firebaseConfig.apiKey as string | undefined)?.trim();
+
+const firebaseApiKey =
+  envFirebaseApiKey && envFirebaseApiKey !== 'YOUR_FIREBASE_WEB_API_KEY'
+    ? envFirebaseApiKey
+    : configFirebaseApiKey && configFirebaseApiKey !== 'REPLACE_WITH_VITE_FIREBASE_API_KEY'
+      ? configFirebaseApiKey
+      : '';
+
+if (!firebaseApiKey) {
+  throw new Error('Missing Firebase API key. Set VITE_FIREBASE_API_KEY in .env.example or apiKey in firebase-applet-config.json.');
+}
+
+const resolvedFirebaseConfig = {
+  ...firebaseConfig,
+  apiKey: firebaseApiKey,
+};
+
+// Initialize Firebase SDK
+const app = initializeApp(resolvedFirebaseConfig);
+export const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({
+    tabManager: persistentSingleTabManager({ forceOwnership: true }),
+    cacheSizeBytes: 20 * 1024 * 1024, // 20 MB max — auto-cleans old data beyond this
+  }),
+}, resolvedFirebaseConfig.firestoreDatabaseId);
+export const auth = getAuth(app);
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId: string | undefined;
+    email: string | null | undefined;
+    emailVerified: boolean | undefined;
+    isAnonymous: boolean | undefined;
+    tenantId: string | null | undefined;
+    providerInfo: {
+      providerId: string;
+      displayName: string | null;
+      email: string | null;
+      photoUrl: string | null;
+    }[];
+  }
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+      isAnonymous: auth.currentUser?.isAnonymous,
+      tenantId: auth.currentUser?.tenantId,
+      providerInfo: auth.currentUser?.providerData.map(provider => ({
+        providerId: provider.providerId,
+        displayName: provider.displayName,
+        email: provider.email,
+        photoUrl: provider.photoURL
+      })) || []
+    },
+    operationType,
+    path
+  }
+  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
