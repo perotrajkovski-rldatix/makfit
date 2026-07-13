@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.makfit.app',
+  appId: 'com.mojfit.app',
   appName: 'МојФит',
   webDir: 'dist',
   android: {

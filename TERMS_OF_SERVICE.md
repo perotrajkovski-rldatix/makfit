@@ -147,7 +147,7 @@ We may update these Terms from time to time. The Last Updated date will be revis
 
 ## 18. Contact
 
-Legal: legal@makfit.app
-Support: support@makfit.app
+Legal: legal@mojfit.app
+Support: support@mojfit.app
 
 If these are not your final official addresses, replace them before publishing.

@@ -1,4 +1,4 @@
-package com.makfit.app;
+package com.mojfit.app;
 
 import android.os.Bundle;
 import android.webkit.WebSettings;

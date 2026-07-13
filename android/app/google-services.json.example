@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "YOUR_ANDROID_APP_ID",
         "android_client_info": {
-          "package_name": "com.makfit.app"
+          "package_name": "com.mojfit.app"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "YOUR_ANDROID_OAUTH_CLIENT_ID",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.makfit.app",
+            "package_name": "com.mojfit.app",
             "certificate_hash": "YOUR_ANDROID_SHA1"
           }
         },

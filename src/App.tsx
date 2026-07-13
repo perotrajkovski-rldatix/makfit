@@ -102,10 +102,10 @@ const TRIAL_DAYS = 7;
 const MONTHLY_PRICE_MKD = 299;
 const PLAY_BILLING_UNAVAILABLE_MESSAGE = 'Инсталираната Android верзија нема Play Billing поддршка. Ажурирај ја апликацијата од најновиот Closed Testing build на Google Play.';
 const ANDROID_SUBSCRIPTION_PRODUCT_IDS: Record<SubscriptionPlanInput['id'], string[]> = {
-  'trial-7-days': ['makfit_monthly'],
-  monthly: ['makfit_monthly'],
-  'half-yearly': ['makfit_half_yearly'],
-  yearly: ['makfit_yearly'],
+  'trial-7-days': ['mojfit_monthly'],
+  monthly: ['mojfit_monthly'],
+  'half-yearly': ['mojfit_half_yearly'],
+  yearly: ['mojfit_yearly'],
 };
 
 function isAndroidPlayBillingFlow(): boolean {
@@ -131,10 +131,10 @@ function isPlayBillingUnimplementedError(error: unknown): boolean {
 // the system for eligible accounts, so trial and monthly map to the same product id.
 const IOS_STOREKIT_UNAVAILABLE_MESSAGE = 'Оваа верзија на апликацијата нема поддршка за претплата преку App Store. Ажурирај ја апликацијата од најновата верзија.';
 const IOS_SUBSCRIPTION_PRODUCT_IDS: Record<SubscriptionPlanInput['id'], string> = {
-  'trial-7-days': 'makfit_monthly',
-  monthly: 'makfit_monthly',
-  'half-yearly': 'makfit_half_yearly',
-  yearly: 'makfit_yearly',
+  'trial-7-days': 'mojfit_monthly',
+  monthly: 'mojfit_monthly',
+  'half-yearly': 'mojfit_half_yearly',
+  yearly: 'mojfit_yearly',
 };
 
 function isIOSPurchaseFlow(): boolean {
@@ -1165,7 +1165,7 @@ function AppContent() {
       return;
     }
 
-    const key = `makfit:seen-achievements:${user.uid}`;
+    const key = `mojfit:seen-achievements:${user.uid}`;
     try {
       const raw = localStorage.getItem(key);
       const parsed = raw ? JSON.parse(raw) : [];
@@ -1408,7 +1408,7 @@ function AppContent() {
     const mergedSeen = Array.from(new Set([...seenAchievementIds, ...unseenIds]));
     setSeenAchievementIds(mergedSeen);
 
-    const key = `makfit:seen-achievements:${user.uid}`;
+    const key = `mojfit:seen-achievements:${user.uid}`;
     try {
       localStorage.setItem(key, JSON.stringify(mergedSeen));
     } catch {
@@ -1730,7 +1730,7 @@ function AppContent() {
       // Clear client-side premium-related caches before logout.
       setPlayEntitled(false);
       try {
-        localStorage.removeItem(`makfit:seen-achievements:${uid}`);
+        localStorage.removeItem(`mojfit:seen-achievements:${uid}`);
       } catch {
         // Ignore localStorage failures.
       }

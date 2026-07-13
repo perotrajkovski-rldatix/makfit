@@ -22,7 +22,7 @@ interface StoredMealPlanPreference {
 }
 
 const MK_DAYS = ['Понеделник', 'Вторник', 'Среда', 'Четврток', 'Петок', 'Сабота', 'Недела'];
-const STORAGE_KEY = 'makfit.mealPlanPreference';
+const STORAGE_KEY = 'mojfit.mealPlanPreference';
 
 function readStoredPreference(userId: string | null): StoredMealPlanPreference | null {
   if (!userId || typeof window === 'undefined') return null;

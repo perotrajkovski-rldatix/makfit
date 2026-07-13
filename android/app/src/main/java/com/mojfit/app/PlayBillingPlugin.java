@@ -1,4 +1,4 @@
-package com.makfit.app;
+package com.mojfit.app;
 
 import android.app.Activity;
 import androidx.annotation.NonNull;

@@ -481,7 +481,7 @@ export default function ProfileView({
 
   const savedPremiumBadgeIds = useMemo(() => {
     if (!user) return [] as string[];
-    const key = `makfit:seen-achievements:${user.uid}`;
+    const key = `mojfit:seen-achievements:${user.uid}`;
     try {
       const raw = localStorage.getItem(key);
       const parsed = raw ? JSON.parse(raw) : [];
