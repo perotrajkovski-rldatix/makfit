@@ -53,6 +53,7 @@ import AiMealPlanView from './views/AiMealPlanView';
 import ProgressPhotosView from './views/ProgressPhotosView';
 import ChallengesView from './views/ChallengesView';
 import { PlayBilling, isPlayBillingBridgeAvailable, type BillingProduct } from './plugins/playBilling';
+import { StoreKitBilling, isStoreKitBridgeAvailable } from './plugins/storeKitBilling';
 
 async function testConnection() {
   try {
@@ -123,6 +124,33 @@ function isPlayBillingUnimplementedError(error: unknown): boolean {
   return message.includes('playbilling')
     && message.includes('not implemented')
     && message.includes('android');
+}
+
+// iOS has no client-selectable trial "offer" like Play — a free trial is an Introductory
+// Offer configured once on the monthly product in App Store Connect and auto-applied by
+// the system for eligible accounts, so trial and monthly map to the same product id.
+const IOS_STOREKIT_UNAVAILABLE_MESSAGE = 'Оваа верзија на апликацијата нема поддршка за претплата преку App Store. Ажурирај ја апликацијата од најновата верзија.';
+const IOS_SUBSCRIPTION_PRODUCT_IDS: Record<SubscriptionPlanInput['id'], string> = {
+  'trial-7-days': 'makfit_monthly',
+  monthly: 'makfit_monthly',
+  'half-yearly': 'makfit_half_yearly',
+  yearly: 'makfit_yearly',
+};
+
+function isIOSPurchaseFlow(): boolean {
+  return Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'ios';
+}
+
+function ensureIOSStoreKitAvailable(): void {
+  if (isIOSPurchaseFlow() && !isStoreKitBridgeAvailable()) {
+    throw new Error(IOS_STOREKIT_UNAVAILABLE_MESSAGE);
+  }
+}
+
+// Existing profiles predate this field and were only ever granted via Android — default
+// to 'android' so today's Play subscribers keep being validated/revoked exactly as before.
+function subscriptionOwnerPlatform(profile: Profile | null): 'android' | 'ios' {
+  return profile?.subscriptionPlatform === 'ios' ? 'ios' : 'android';
 }
 
 function addDays(baseDate: Date, days: number): Date {
@@ -375,6 +403,7 @@ function AppContent() {
   const [purchasedThemeIds, setPurchasedThemeIds] = useState<ThemeId[]>([]);
   const subscriptionSyncInFlightRef = useRef(false);
   const [playEntitled, setPlayEntitled] = useState(false);
+  const [iosEntitled, setIosEntitled] = useState(false);
   const [isTrialEligible, setIsTrialEligible] = useState(false);
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [showOfflinePremiumPopup, setShowOfflinePremiumPopup] = useState(false);
@@ -496,7 +525,7 @@ function AppContent() {
     if (Date.now() < nextChargeTime) return;
 
     const promoteTrialToMonthly = async () => {
-      if (isAndroidPlayBillingFlow()) {
+      if (isAndroidPlayBillingFlow() && subscriptionOwnerPlatform(profile) === 'android') {
         try {
           ensureAndroidPlayBillingAvailable();
           const candidateProductIds = ANDROID_SUBSCRIPTION_PRODUCT_IDS['trial-7-days'];
@@ -507,6 +536,19 @@ function AppContent() {
           }
         } catch (error) {
           handleFirestoreError(error, OperationType.GET, `profiles/${user.uid}/trial-play-validation`);
+          return;
+        }
+      } else if (isIOSPurchaseFlow() && subscriptionOwnerPlatform(profile) === 'ios') {
+        try {
+          ensureIOSStoreKitAvailable();
+          const trialProductId = IOS_SUBSCRIPTION_PRODUCT_IDS['trial-7-days'];
+          const { purchases } = await StoreKitBilling.getActiveSubscriptions();
+          const trialPurchase = purchases.find(p => p.productId === trialProductId);
+          if (!trialPurchase || !trialPurchase.autoRenewing) {
+            return;
+          }
+        } catch (error) {
+          handleFirestoreError(error, OperationType.GET, `profiles/${user.uid}/trial-storekit-validation`);
           return;
         }
       }
@@ -628,6 +670,7 @@ function AppContent() {
                 subscriptionExpiresAt: newExpiresAt,
                 subscriptionNextChargeAt: newExpiresAt,
                 subscriptionLastChargeAt: new Date().toISOString(),
+                subscriptionPlatform: 'android',
               });
               return;
             }
@@ -640,12 +683,15 @@ function AppContent() {
               isPremium: true,
               subscriptionStatus: 'active',
               subscriptionStartedAt: profile?.subscriptionStartedAt || nowIso,
+              subscriptionPlatform: 'android',
             });
           }
         } else {
-          // No active subscription in Google Play — revoke premium
+          // No active subscription in Google Play. Only revoke if this profile's subscription
+          // was actually granted via Android — otherwise it may be a valid subscription the
+          // same account purchased on iOS, which Android has no authority to cancel.
           setPlayEntitled(false);
-          if (profile?.isPremium) {
+          if (profile?.isPremium && subscriptionOwnerPlatform(profile) === 'android') {
             await updateDoc(doc(db, 'profiles', user.uid), {
               isPremium: false,
               subscriptionStatus: 'expired',
@@ -686,6 +732,129 @@ function AppContent() {
     };
   }, [user?.uid, profile?.isPremium, profile?.subscriptionStatus]);
 
+  // Mirrors the Android Play Billing entitlement-sync effect above, adapted for StoreKit 2.
+  useEffect(() => {
+    if (!isIOSPurchaseFlow()) return;
+    if (!isStoreKitBridgeAvailable()) return;
+    if (!user) return;
+
+    let cancelled = false;
+    let inFlight = false;
+
+    const syncIOSEntitlement = async () => {
+      if (inFlight || subscriptionSyncInFlightRef.current) return;
+      inFlight = true;
+      subscriptionSyncInFlightRef.current = true;
+
+      try {
+        const candidateProductIds = Array.from(new Set(Object.values(IOS_SUBSCRIPTION_PRODUCT_IDS)));
+        const { purchases } = await StoreKitBilling.getActiveSubscriptions();
+        const activeIOSSubscription = purchases.find(p => candidateProductIds.includes(p.productId));
+        const hasSubscriptionHistory = !!(
+          profile?.subscriptionPlanId
+          || profile?.subscriptionStatus === 'active'
+          || profile?.subscriptionStatus === 'trialing'
+          || profile?.subscriptionStartedAt
+          || profile?.subscriptionTrialStartedAt
+        );
+
+        if (activeIOSSubscription) {
+          // After account/profile deletion, do not auto-restore premium on a fresh profile.
+          if (!hasSubscriptionHistory) {
+            setIosEntitled(false);
+            return;
+          }
+
+          // Subscription is active in the App Store
+          setIosEntitled(true);
+
+          // If auto-renewing is false and we've passed expiration, revoke on expiration
+          if (!activeIOSSubscription.autoRenewing && profile?.subscriptionExpiresAt) {
+            const expiresTime = new Date(profile.subscriptionExpiresAt).getTime();
+            if (Date.now() >= expiresTime) {
+              await updateDoc(doc(db, 'profiles', user.uid), {
+                isPremium: false,
+                subscriptionStatus: 'expired',
+              });
+              return;
+            }
+          }
+
+          // If auto-renewing is true and expiration date is in the past, it auto-renewed
+          if (activeIOSSubscription.autoRenewing && profile?.subscriptionExpiresAt) {
+            const expiresTime = new Date(profile.subscriptionExpiresAt).getTime();
+            if (Date.now() >= expiresTime) {
+              const planDuration = profile?.subscriptionDurationMonths || 1;
+              const newExpiresAt = addMonths(new Date(), planDuration).toISOString();
+              await updateDoc(doc(db, 'profiles', user.uid), {
+                isPremium: true,
+                subscriptionStatus: 'active',
+                subscriptionExpiresAt: newExpiresAt,
+                subscriptionNextChargeAt: newExpiresAt,
+                subscriptionLastChargeAt: new Date().toISOString(),
+                subscriptionPlatform: 'ios',
+              });
+              return;
+            }
+          }
+
+          // Normal active case — ensure premium is set
+          if (!profile?.isPremium) {
+            const nowIso = new Date().toISOString();
+            await updateDoc(doc(db, 'profiles', user.uid), {
+              isPremium: true,
+              subscriptionStatus: 'active',
+              subscriptionStartedAt: profile?.subscriptionStartedAt || nowIso,
+              subscriptionPlatform: 'ios',
+            });
+          }
+        } else {
+          // No active App Store subscription. Only revoke if this profile's subscription was
+          // actually granted via iOS — otherwise it may be a valid subscription the same
+          // account purchased on Android, which iOS has no authority to cancel.
+          setIosEntitled(false);
+          if (profile?.isPremium && subscriptionOwnerPlatform(profile) === 'ios') {
+            await updateDoc(doc(db, 'profiles', user.uid), {
+              isPremium: false,
+              subscriptionStatus: 'expired',
+            });
+          }
+        }
+      } catch (error) {
+        // Log silently — StoreKit may be temporarily unavailable; interval will retry
+        console.warn('StoreKit entitlement sync error:', error);
+      } finally {
+        inFlight = false;
+        subscriptionSyncInFlightRef.current = false;
+      }
+    };
+
+    syncIOSEntitlement();
+    // Check every 5 seconds to catch subscription expiration immediately
+    const interval = window.setInterval(syncIOSEntitlement, 5000);
+
+    // Re-sync when the app comes back to the foreground (e.g. returning from an App Store sheet)
+    const foregroundListener = CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+      if (isActive) syncIOSEntitlement();
+    });
+
+    // Re-sync when the plugin fires a purchaseRestored event (renewal, restore, or a purchase
+    // that completed after the app was killed mid-flow)
+    const purchaseRestoredListener = StoreKitBilling.addListener('purchaseRestored', () => {
+      syncIOSEntitlement();
+    });
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      foregroundListener.then(h => h.remove());
+      purchaseRestoredListener.then(h => h.remove());
+      if (cancelled) {
+        inFlight = false;
+      }
+    };
+  }, [user?.uid, profile?.isPremium, profile?.subscriptionStatus]);
+
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -699,12 +868,12 @@ function AppContent() {
   }, []);
 
   useEffect(() => {
-    if (!isAppReady || !(profile?.isPremium || playEntitled) || isOnline) return;
+    if (!isAppReady || !(profile?.isPremium || playEntitled || iosEntitled) || isOnline) return;
     if (offlinePremiumPopupShownRef.current) return;
 
     offlinePremiumPopupShownRef.current = true;
     setShowOfflinePremiumPopup(true);
-  }, [isAppReady, profile?.isPremium, playEntitled, isOnline]);
+  }, [isAppReady, profile?.isPremium, playEntitled, iosEntitled, isOnline]);
 
   const planDayTargets = useMemo(() => {
     if (!profile?.isPremium || !profile.mealPlanType || !profile.mealPlanSeed) return null;
@@ -1821,7 +1990,25 @@ function AppContent() {
             offerToken: selectedProduct.offerToken,
           });
           setPlayEntitled(true);
+        } else if (isIOSPurchaseFlow()) {
+          ensureIOSStoreKitAvailable();
+          const iosProductId = IOS_SUBSCRIPTION_PRODUCT_IDS['trial-7-days'];
+          const { products } = await StoreKitBilling.getProducts({ productIds: [iosProductId] });
+          const selectedProduct = products.find(p => p.productId === iosProductId);
+
+          if (!selectedProduct) {
+            throw new Error('Не е пронајден активен App Store производ за 7-дневен пробен период.');
+          }
+
+          await StoreKitBilling.purchaseSubscription({ productId: selectedProduct.productId });
+          setIosEntitled(true);
         }
+
+        const purchasePlatform: Profile['subscriptionPlatform'] = isAndroidPlayBillingFlow()
+          ? 'android'
+          : isIOSPurchaseFlow()
+            ? 'ios'
+            : undefined;
 
         const profileRef = doc(db, 'profiles', user.uid);
         const trialEndsAt = addDays(startOfLocalDay(now), TRIAL_DAYS).toISOString();
@@ -1843,6 +2030,7 @@ function AppContent() {
           subscriptionNextPlanId: 'monthly',
           subscriptionNextPlanTitle: '1 месец',
           subscriptionNextPriceMKD: MONTHLY_PRICE_MKD,
+          subscriptionPlatform: purchasePlatform,
         };
 
         await runTransaction(db, async transaction => {
@@ -1867,6 +2055,7 @@ function AppContent() {
             subscriptionNextPlanTitle: '1 месец',
             subscriptionNextPriceMKD: MONTHLY_PRICE_MKD,
             subscriptionPaymentLast4: null,
+            subscriptionPlatform: purchasePlatform,
           });
 
           transaction.set(trialUsageRef, {
@@ -1897,7 +2086,25 @@ function AppContent() {
           offerToken: selectedProduct.offerToken,
         });
         setPlayEntitled(true);
+      } else if (isIOSPurchaseFlow()) {
+        ensureIOSStoreKitAvailable();
+        const iosProductId = IOS_SUBSCRIPTION_PRODUCT_IDS[plan.id];
+        const { products } = await StoreKitBilling.getProducts({ productIds: [iosProductId] });
+        const selectedProduct = products.find(p => p.productId === iosProductId);
+
+        if (!selectedProduct) {
+          throw new Error('Не е пронајден активен App Store производ за избраниот пакет.');
+        }
+
+        await StoreKitBilling.purchaseSubscription({ productId: selectedProduct.productId });
+        setIosEntitled(true);
       }
+
+      const purchasePlatform: Profile['subscriptionPlatform'] = isAndroidPlayBillingFlow()
+        ? 'android'
+        : isIOSPurchaseFlow()
+          ? 'ios'
+          : undefined;
 
       const subscriptionExpiresAt = addMonths(now, plan.months).toISOString();
       const updatedProfile: Profile = {
@@ -1917,6 +2124,7 @@ function AppContent() {
         subscriptionNextPriceMKD: plan.priceMKD,
         subscriptionLastChargeAt: now.toISOString(),
         subscriptionPaymentLast4: undefined,
+        subscriptionPlatform: purchasePlatform,
       };
 
       await updateDoc(doc(db, 'profiles', user.uid), {
@@ -1937,6 +2145,7 @@ function AppContent() {
         subscriptionTrialStartedAt: null,
         subscriptionTrialEndsAt: null,
         subscriptionPaymentLast4: null,
+        subscriptionPlatform: purchasePlatform,
       });
       setProfile(updatedProfile);
     } catch (error) {
@@ -1947,7 +2156,36 @@ function AppContent() {
     }
   };
 
-  const effectiveIsPremium = (profile?.isPremium ?? false) || playEntitled;
+  // Required by App Review (3.1.1) as a visible restore affordance. Forces StoreKit to
+  // reconcile with Apple's servers, then reconciles Firestore the same way the periodic
+  // entitlement-sync effect above does; that effect keeps running afterward as usual.
+  const restoreIOSPurchases = async (): Promise<{ restored: boolean; message: string }> => {
+    if (!user) throw new Error('profile-not-ready');
+    ensureIOSStoreKitAvailable();
+
+    const candidateProductIds = Array.from(new Set(Object.values(IOS_SUBSCRIPTION_PRODUCT_IDS)));
+    const { purchases } = await StoreKitBilling.restorePurchases();
+    const activeIOSSubscription = purchases.find(p => candidateProductIds.includes(p.productId));
+
+    if (!activeIOSSubscription) {
+      setIosEntitled(false);
+      return { restored: false, message: 'Не е пронајдена активна претплата за обновување.' };
+    }
+
+    setIosEntitled(true);
+    if (!profile?.isPremium) {
+      const nowIso = new Date().toISOString();
+      await updateDoc(doc(db, 'profiles', user.uid), {
+        isPremium: true,
+        subscriptionStatus: 'active',
+        subscriptionStartedAt: profile?.subscriptionStartedAt || nowIso,
+        subscriptionPlatform: 'ios',
+      });
+    }
+    return { restored: true, message: 'Претплатата е успешно вратена.' };
+  };
+
+  const effectiveIsPremium = (profile?.isPremium ?? false) || playEntitled || iosEntitled;
 
   // --- Loading splash ---
   if (!isAppReady || loading) {
@@ -2194,6 +2432,7 @@ function AppContent() {
             setView={setView}
             onSubscribe={activateSubscription}
             isTrialEligible={isTrialEligible}
+            onRestorePurchases={isIOSPurchaseFlow() ? restoreIOSPurchases : undefined}
           />
         )}
         {view === 'mealplan' && effectiveIsPremium && (

@@ -67,6 +67,8 @@ interface Props {
   setView: (v: ViewType) => void;
   onSubscribe: (plan: SubscriptionPlan) => Promise<void>;
   isTrialEligible: boolean;
+  // Only provided on iOS — App Review (3.1.1) requires a visible restore-purchases affordance.
+  onRestorePurchases?: () => Promise<{ restored: boolean; message: string }>;
 }
 
 interface SubscriptionPlan {
@@ -166,9 +168,11 @@ function getSubscriptionActiveDays(startIso?: string): number | null {
   return Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
 }
 
-export default function SubscriptionView({ profile, setView, onSubscribe, isTrialEligible }: Props) {
+export default function SubscriptionView({ profile, setView, onSubscribe, isTrialEligible, onRestorePurchases }: Props) {
   // Info modal state removed
   const isPremium = profile?.isPremium ?? false;
+  const [restoreStatus, setRestoreStatus] = useState<'idle' | 'loading'>('idle');
+  const [restoreMessage, setRestoreMessage] = useState<string | null>(null);
   const isTrialing = profile?.subscriptionStatus === 'trialing';
   const trialDaysLeft = getTrialDaysLeft(profile?.subscriptionTrialEndsAt);
   const subscriptionStartDate = formatSubscriptionDate(profile?.subscriptionStartedAt);
@@ -215,6 +219,22 @@ export default function SubscriptionView({ profile, setView, onSubscribe, isTria
 
   const handleLockedFeatureClick = () => {
     ctaRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const handleRestorePurchases = async () => {
+    if (!onRestorePurchases || restoreStatus === 'loading') return;
+    setRestoreStatus('loading');
+    setRestoreMessage(null);
+    try {
+      const result = await onRestorePurchases();
+      setRestoreMessage(result.message);
+    } catch (error) {
+      setRestoreMessage(error instanceof Error && error.message
+        ? error.message
+        : 'Настана проблем при обновување. Обиди се повторно.');
+    } finally {
+      setRestoreStatus('idle');
+    }
   };
 
   const handleSubscribe = async () => {
@@ -353,6 +373,21 @@ export default function SubscriptionView({ profile, setView, onSubscribe, isTria
               <Crown size={20} />
               Претплати се
             </button>
+          </div>
+        )}
+
+        {onRestorePurchases && (
+          <div className="mt-5 text-center">
+            <button
+              onClick={handleRestorePurchases}
+              disabled={restoreStatus === 'loading'}
+              className="text-xs font-semibold text-zinc-400 hover:text-zinc-200 disabled:opacity-60 underline underline-offset-2"
+            >
+              {restoreStatus === 'loading' ? 'Се обновува...' : 'Обнови претплата (Restore Purchases)'}
+            </button>
+            {restoreMessage && (
+              <p className="mt-2 text-xs text-zinc-500">{restoreMessage}</p>
+            )}
           </div>
         )}
       </motion.div>

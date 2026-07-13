@@ -136,7 +136,7 @@ service cloud.firestore {
 
     function isValidProfile(data) {
       return data.keys().hasAll(['userId', 'weight', 'height', 'age', 'gender', 'activityLevel', 'goal']) &&
-             hasOnlyAllowedFields(['userId', 'weight', 'height', 'age', 'gender', 'activityLevel', 'goal', 'trainingType', 'trainingFrequency', 'dailyActivity', 'profileImage', 'targetCalories', 'targetProtein', 'targetCarbs', 'targetFat', 'isSetupDone', 'isPremium', 'mealPlanType', 'mealPlanSeed', 'subscriptionPlanId', 'subscriptionPlanTitle', 'subscriptionDurationMonths', 'subscriptionPriceMKD', 'subscriptionCurrency', 'subscriptionStatus', 'subscriptionStartedAt', 'subscriptionExpiresAt', 'subscriptionTrialStartedAt', 'subscriptionTrialEndsAt', 'subscriptionNextChargeAt', 'subscriptionNextPlanId', 'subscriptionNextPlanTitle', 'subscriptionNextPriceMKD', 'subscriptionLastChargeAt', 'subscriptionPaymentLast4', 'maxLevelAchieved', 'activeTheme']) &&
+             hasOnlyAllowedFields(['userId', 'weight', 'height', 'age', 'gender', 'activityLevel', 'goal', 'trainingType', 'trainingFrequency', 'dailyActivity', 'profileImage', 'targetCalories', 'targetProtein', 'targetCarbs', 'targetFat', 'isSetupDone', 'isPremium', 'mealPlanType', 'mealPlanSeed', 'subscriptionPlanId', 'subscriptionPlanTitle', 'subscriptionDurationMonths', 'subscriptionPriceMKD', 'subscriptionCurrency', 'subscriptionStatus', 'subscriptionStartedAt', 'subscriptionExpiresAt', 'subscriptionTrialStartedAt', 'subscriptionTrialEndsAt', 'subscriptionNextChargeAt', 'subscriptionNextPlanId', 'subscriptionNextPlanTitle', 'subscriptionNextPriceMKD', 'subscriptionLastChargeAt', 'subscriptionPaymentLast4', 'subscriptionPlatform', 'maxLevelAchieved', 'activeTheme']) &&
              data.userId == request.auth.uid &&
              data.weight is number && data.weight > 0 && data.weight < 500 &&
              data.height is number && data.height > 0 && data.height < 300 &&
@@ -164,6 +164,7 @@ service cloud.firestore {
              (!('subscriptionNextPriceMKD' in data) || data.subscriptionNextPriceMKD == null || (data.subscriptionNextPriceMKD is number && data.subscriptionNextPriceMKD >= 0)) &&
              (!('subscriptionLastChargeAt' in data) || data.subscriptionLastChargeAt == null || isValidDateString(data.subscriptionLastChargeAt)) &&
              (!('subscriptionPaymentLast4' in data) || data.subscriptionPaymentLast4 == null || data.subscriptionPaymentLast4 is string) &&
+             (!('subscriptionPlatform' in data) || data.subscriptionPlatform == null || data.subscriptionPlatform in ['android', 'ios']) &&
              (!('maxLevelAchieved' in data) || (data.maxLevelAchieved is number && data.maxLevelAchieved >= 1 && data.maxLevelAchieved <= 20)) &&
              (!('activeTheme' in data) || data.activeTheme in ['balanced-green', 'neon-xp', 'beast-mode-red', 'elite-gold', 'midnight-focus', 'sunrise-motivation', 'fresh-nutrition', 'protein-power']);
     }

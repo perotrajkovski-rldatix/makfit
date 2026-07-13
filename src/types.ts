@@ -45,6 +45,7 @@ export interface Profile {
   subscriptionNextPriceMKD?: number;
   subscriptionLastChargeAt?: string;
   subscriptionPaymentLast4?: string;
+  subscriptionPlatform?: 'android' | 'ios';
   mealPlanType?: 'high_protein' | 'low_fat' | 'low_carbs' | 'vegetarian' | 'lactose_free';
   mealPlanSeed?: number;
   maxLevelAchieved?: number;
