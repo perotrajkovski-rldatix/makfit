@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.makfit.app',
-  appName: 'МакФит',
+  appName: 'МојФит',
   webDir: 'dist',
   android: {
     // Force WebView to always reload assets from APK, not from cache

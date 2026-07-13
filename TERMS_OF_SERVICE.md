@@ -3,13 +3,13 @@
 Effective Date: 2026-06-09
 Last Updated: 2026-06-09
 
-These Terms of Service ("Terms") govern your use of MakFit (the "Service"). By creating an account or using the Service, you agree to these Terms.
+These Terms of Service ("Terms") govern your use of MojFit (the "Service"). By creating an account or using the Service, you agree to these Terms.
 
 If you do not agree, do not use the Service.
 
 ## 1. Who Provides the Service
 
-Provider: MakFit
+Provider: MojFit
 Legal contact: makfit2026@gmail.com
 Support: makfit2026@gmail.com
 
@@ -30,7 +30,7 @@ You must notify us promptly if you suspect unauthorized account access.
 
 ## 4. Service Description
 
-MakFit provides fitness and nutrition tracking tools, including:
+MojFit provides fitness and nutrition tracking tools, including:
 - Profile and target setup
 - Meal and weight logging
 - Progress photos
@@ -41,14 +41,14 @@ We may add, remove, or modify features over time.
 
 ## 5. Health and Safety Disclaimer
 
-MakFit is not a medical device and does not provide medical advice, diagnosis, or treatment.
+MojFit is not a medical device and does not provide medical advice, diagnosis, or treatment.
 
 You are solely responsible for your health decisions. Consult a qualified medical professional before changing diet or exercise routines.
 
 ## 6. Premium, Trial, Billing, and Cancellation
 
 ### 6.1 Plan Types in Current Product
-MakFit currently supports these premium plan types in product logic:
+MojFit currently supports these premium plan types in product logic:
 - 7-day trial (`trial-7-days`)
 - Monthly (`monthly`)
 - 6-month (`half-yearly`)
@@ -71,13 +71,13 @@ Cancellation methods depend on purchase channel:
 Refunds are handled under applicable law and the policy of the payment channel used for purchase.
 
 ### 6.6 Payment Data
-MakFit does not intentionally store full card number or CVV in Firestore. If payment data is processed, it should be processed by authorized payment processors or app stores.
+MojFit does not intentionally store full card number or CVV in Firestore. If payment data is processed, it should be processed by authorized payment processors or app stores.
 
 ## 7. User Content
 
 "User Content" includes profile data, logs, photos, and other data you submit.
 
-You retain ownership of your User Content. You grant MakFit a non-exclusive, worldwide, royalty-free license to host, store, process, and display User Content solely for operating, securing, and improving the Service.
+You retain ownership of your User Content. You grant MojFit a non-exclusive, worldwide, royalty-free license to host, store, process, and display User Content solely for operating, securing, and improving the Service.
 
 You represent that your User Content does not violate any law or third-party rights.
 
@@ -98,17 +98,17 @@ Your use of the Service is also governed by the Privacy Policy:
 
 ## 10. Intellectual Property
 
-Except for your User Content, all software, visuals, branding, and content in MakFit are owned by MakFit or its licensors and protected by applicable intellectual property laws.
+Except for your User Content, all software, visuals, branding, and content in MojFit are owned by MojFit or its licensors and protected by applicable intellectual property laws.
 
 No rights are granted except as expressly stated in these Terms.
 
 ## 11. Third-Party Services
 
-MakFit depends on third-party infrastructure and SDKs, including Firebase services. Your use of those components may also be subject to third-party terms.
+MojFit depends on third-party infrastructure and SDKs, including Firebase services. Your use of those components may also be subject to third-party terms.
 
 ## 12. Suspension and Termination
 
-You may stop using MakFit at any time.
+You may stop using MojFit at any time.
 
 We may suspend or terminate access if:
 - You materially violate these Terms
@@ -125,7 +125,7 @@ We do not guarantee uninterrupted or error-free operation.
 
 ## 14. Limitation of Liability
 
-To the fullest extent permitted by law, MakFit and its affiliates are not liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or loss of profits, data, or goodwill.
+To the fullest extent permitted by law, MojFit and its affiliates are not liable for indirect, incidental, special, consequential, exemplary, or punitive damages, or loss of profits, data, or goodwill.
 
 Our aggregate liability for claims arising out of or relating to the Service will not exceed the amount you paid for the Service in the 12 months before the event giving rise to liability.
 
@@ -133,7 +133,7 @@ Nothing in these Terms limits liability where such limitation is prohibited by l
 
 ## 15. Indemnity
 
-You agree to indemnify and hold harmless MakFit from claims, damages, losses, and expenses (including reasonable legal fees) arising from your misuse of the Service, your User Content, or your breach of these Terms.
+You agree to indemnify and hold harmless MojFit from claims, damages, losses, and expenses (including reasonable legal fees) arising from your misuse of the Service, your User Content, or your breach of these Terms.
 
 ## 16. Governing Law and Venue
 

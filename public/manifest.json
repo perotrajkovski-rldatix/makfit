@@ -1,6 +1,6 @@
 {
-  "name": "МакФит",
-  "short_name": "МакФит",
+  "name": "МојФит",
+  "short_name": "МојФит",
   "description": "Вашиот личен фитнес асистент",
   "start_url": "/",
   "display": "standalone",

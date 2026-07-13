@@ -2,20 +2,20 @@
 **Effective Date:** 2026-07-02
 **Last Updated:** 2026-07-02
 
-MakFit ("MakFit", "we", "us", or "our") respects your privacy. This Privacy Policy explains how we collect, use, disclose, and protect personal data when you use the MakFit web and mobile applications and related services (collectively, the "Service").
+MojFit ("MojFit", "we", "us", or "our") respects your privacy. This Privacy Policy explains how we collect, use, disclose, and protect personal data when you use the MojFit web and mobile applications and related services (collectively, the "Service").
 
 If you do not agree with this Policy, please do not use the Service.
 
 ## 1. Data Controller
-**Controller:** MakFit
+**Controller:** MojFit
 **Contact email:** [makfit2026@gmail.com](mailto:makfit2026@gmail.com)
 **Support email:** [makfit2026@gmail.com](mailto:makfit2026@gmail.com)
 
 ## 2. Scope
 This Policy applies to data processed through:
 
-- MakFit mobile app
-- Authentication and cloud data infrastructure used by MakFit
+- MojFit mobile app
+- Authentication and cloud data infrastructure used by MojFit
 - Support requests and account-related communications
 
 ## 3. Data We Collect
@@ -48,7 +48,7 @@ This Policy applies to data processed through:
 - Trial start/end and next charge dates
 - Currency and subscription price metadata (MKD values)
 - Limited payment metadata fields if present (for example last 4 digits)
-MakFit does not intentionally store full card numbers or CVV in Firestore.
+MojFit does not intentionally store full card numbers or CVV in Firestore.
 
 ### 3.4 Technical and Diagnostic Data
 
@@ -90,7 +90,7 @@ Depending on location, we rely on:
 ## 7. Health Data and Medical Disclaimer
 Fitness and body-related information can be sensitive personal data in some jurisdictions. You choose what to submit.
 
-MakFit is for informational and lifestyle tracking purposes only. It is not medical advice, diagnosis, or treatment.
+MojFit is for informational and lifestyle tracking purposes only. It is not medical advice, diagnosis, or treatment.
 
 ## 8. Sharing and Disclosure
 We do not sell personal data.
@@ -115,9 +115,9 @@ Typical retention approach:
 - Post-deletion backups: may persist temporarily in secure backups before overwrite
 
 ## 11. Account Deletion and Data Deletion
-MakFit provides in-app account deletion.
+MojFit provides in-app account deletion.
 
-When deletion succeeds, MakFit attempts to remove:
+When deletion succeeds, MojFit attempts to remove:
 
 - Authentication account
 - Profile and user documents
@@ -145,21 +145,21 @@ Depending on jurisdiction, you may have rights to:
 Requests: [makfit2026@gmail.com](mailto:makfit2026@gmail.com)
 
 ## 14. Children
-MakFit is not directed to children under 16. If you believe a child has provided personal data without authorization, contact us and we will take appropriate action.
+MojFit is not directed to children under 16. If you believe a child has provided personal data without authorization, contact us and we will take appropriate action.
 
 ## 15. Third-Party Services
-MakFit relies on third-party services, including:
+MojFit relies on third-party services, including:
 
 - Firebase Authentication (account authentication)
 - Cloud Firestore (application database and sync)
 - Google Play Billing on Android (subscription purchase processing)
 - Apple App Store billing on iOS (subscription purchase processing)
-MakFit does not receive or store full payment card numbers or CVV from Google Play or Apple App Store transactions.
+MojFit does not receive or store full payment card numbers or CVV from Google Play or Apple App Store transactions.
 
 Third-party processing is also subject to those providers' terms and privacy notices.
 
 ## 16. Automated Processing
-MakFit uses automated logic for product features (for example challenge completion checks, points, badges, level progression, premium gating). This is used to provide in-app functionality and is not intended to produce legal or similarly significant effects.
+MojFit uses automated logic for product features (for example challenge completion checks, points, badges, level progression, premium gating). This is used to provide in-app functionality and is not intended to produce legal or similarly significant effects.
 
 ## 17. Changes to This Policy
 We may update this Privacy Policy from time to time. We will update the Last Updated date and provide additional notice where required by law.

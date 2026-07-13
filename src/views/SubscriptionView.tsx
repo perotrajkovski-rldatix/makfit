@@ -286,7 +286,7 @@ export default function SubscriptionView({ profile, setView, onSubscribe, isTria
                   <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
                   <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Активна претплата</span>
                 </div>
-                <h3 className="text-2xl font-bold mb-1">МакФит Premium</h3>
+                <h3 className="text-2xl font-bold mb-1">МојФит Premium</h3>
                 <p className="text-zinc-400 text-sm">Имаш пристап до сите premium функции.</p>
                 <div className="mt-4 bg-black/30 border border-amber-500/25 rounded-2xl p-3">
                   <div className="flex items-center justify-between mb-2">
@@ -306,7 +306,7 @@ export default function SubscriptionView({ profile, setView, onSubscribe, isTria
               </>
             ) : (
               <>
-                <h3 className="text-2xl font-bold mb-2">МакФит Premium</h3>
+                <h3 className="text-2xl font-bold mb-2">МојФит Premium</h3>
                 <p className="text-zinc-400 text-sm leading-relaxed">
                   Отклучи ги сите напредни функции и достигни ги своите цели побрзо.
                 </p>

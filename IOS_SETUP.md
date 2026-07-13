@@ -46,9 +46,9 @@ Add these keys in `ios/App/App/Info.plist`:
 - `NSPhotoLibraryAddUsageDescription` (if app saves photos)
 
 Suggested Macedonian text:
-- Camera: "МакФит користи камера за скенирање баркодови и додавање прогрес фотографии."
-- Photo library read: "МакФит користи пристап до фотографии за избор на прогрес слики."
-- Photo library add: "МакФит зачувува прогрес фотографии во вашата библиотека кога ќе изберете зачувување."
+- Camera: "МојФит користи камера за скенирање баркодови и додавање прогрес фотографии."
+- Photo library read: "МојФит користи пристап до фотографии за избор на прогрес слики."
+- Photo library add: "МојФит зачувува прогрес фотографии во вашата библиотека кога ќе изберете зачувување."
 
 ## 5) Google Sign-In for iOS
 

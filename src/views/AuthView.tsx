@@ -40,7 +40,7 @@ export default function AuthView({
         <div className="w-20 h-20 bg-emerald-500 rounded-3xl mx-auto mb-6 flex items-center justify-center shadow-lg shadow-emerald-500/20">
           <Activity size={40} className="text-black" />
         </div>
-        <h1 className="text-4xl font-bold tracking-tight mb-2">МакФит</h1>
+        <h1 className="text-4xl font-bold tracking-tight mb-2">МојФит</h1>
         <p className="text-zinc-400">Твојот личен фитнес асистент</p>
       </div>
 
