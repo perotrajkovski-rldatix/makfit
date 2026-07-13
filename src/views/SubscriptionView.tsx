@@ -98,15 +98,15 @@ const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     id: 'monthly',
     title: '1 месец',
     months: 1,
-    priceMKD: 299,
-    perMonthMKD: 299,
+    priceMKD: 300,
+    perMonthMKD: 300,
     subtitle: 'Еднократна месечна наплата',
   },
   {
     id: 'half-yearly',
     title: '6 месеци',
     months: 6,
-    priceMKD: 1499,
+    priceMKD: 1500,
     perMonthMKD: 250,
     subtitle: 'Наплата на секои 6 месеци',
     savingsText: 'Заштеди 16.44%',
@@ -449,7 +449,7 @@ export default function SubscriptionView({ profile, setView, onSubscribe, isTria
                           {plan.isTrial ? (
                             <>
                               <p className="text-2xl font-black text-white leading-none">0 <span className="text-xs font-bold text-zinc-400">МКД денес</span></p>
-                              <p className="text-xs text-zinc-500 mt-1">Потоа 299 МКД/месец</p>
+                              <p className="text-xs text-zinc-500 mt-1">Потоа 300 МКД/месец</p>
                             </>
                           ) : (
                             <>

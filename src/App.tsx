@@ -99,7 +99,7 @@ interface SubscriptionPlanInput {
 }
 
 const TRIAL_DAYS = 7;
-const MONTHLY_PRICE_MKD = 299;
+const MONTHLY_PRICE_MKD = 300;
 const PLAY_BILLING_UNAVAILABLE_MESSAGE = 'Инсталираната Android верзија нема Play Billing поддршка. Ажурирај ја апликацијата од најновиот Closed Testing build на Google Play.';
 const ANDROID_SUBSCRIPTION_PRODUCT_IDS: Record<SubscriptionPlanInput['id'], string[]> = {
   'trial-7-days': ['mojfit_monthly'],
